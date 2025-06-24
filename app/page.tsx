@@ -105,98 +105,21 @@ const closeButtonVariants = {
   },
 };
 
-// Modal animation variants
-const modalVariants = {
-  hidden: {
-    opacity: 0,
-    scale: 0.8,
-    y: 50,
-    filter: "blur(10px)"
-  },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    y: 0,
-    filter: "blur(0px)",
-    transition: {
-      type: "spring" as const,
-      damping: 20,
-      stiffness: 100,
-      duration: 0.8,
-    },
-  },
-  exit: {
-    opacity: 0,
-    scale: 0.8,
-    y: 50,
-    filter: "blur(10px)",
-    transition: {
-      type: "spring" as const,
-      damping: 20,
-      stiffness: 100,
-      duration: 0.5,
-    },
-  },
-};
-
-// Form field animation variants
-const formFieldVariants = {
-  hidden: {
-    opacity: 0,
-    x: -30,
-    filter: "blur(4px)"
-  },
-  visible: {
-    opacity: 1,
-    x: 0,
-    filter: "blur(0px)",
-    transition: {
-      type: "spring" as const,
-      damping: 15,
-      stiffness: 100,
-    },
-  },
-};
 
 export default function Main() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [waitlistOpen, setWaitlistOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    company: "",
-    role: "",
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  // Add state for showing 'Coming Soon' popup
+  const [comingSoon, setComingSoon] = useState("");
 
   // Split text into characters for animation
   const titleText = "We break it,\nbefore your users do.";
   const lines = titleText.split("\n");
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    
-    // Reset form after showing success
-    setTimeout(() => {
-      setIsSubmitted(false);
-      setWaitlistOpen(false);
-      setFormData({ name: "", email: "", company: "", role: "" });
-    }, 3000);
+  // Handler for nav links
+  const handleNavClick = (name: string) => {
+    setComingSoon(`${name} — Coming Soon!`);
+    setTimeout(() => setComingSoon(""), 2000);
   };
 
   return (
@@ -237,7 +160,11 @@ export default function Main() {
                 <ul className="hidden md:flex gap-5 lg:gap-8 xl:gap-20 text-white text-base font-medium 2xl:gap-[80px]">
                   {navLinks.map((link) => (
                     <li key={link.name}>
-                      <a href={link.href} className="hover:text-[#FE7743] transition-colors duration-200">
+                      <a
+                        href={link.href}
+                        className="hover:text-[#FE7743] transition-colors duration-200 cursor-pointer"
+                        onClick={e => { e.preventDefault(); handleNavClick(link.name); }}
+                      >
                         {link.name}
                       </a>
                     </li>
@@ -314,7 +241,7 @@ export default function Main() {
                           <a
                             href={link.href}
                             className="hover:text-[#FE7743] transition-colors duration-200 cursor-pointer relative group"
-                            onClick={() => setMenuOpen(false)}
+                            onClick={e => { e.preventDefault(); handleNavClick(link.name); setMenuOpen(false); }}
                           >
                             {link.name}
                             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#FE7743] transition-all duration-300 group-hover:w-full"></span>
@@ -444,6 +371,22 @@ export default function Main() {
 
       {/* Waitlist Modal */}
       <WaitlistModal isOpen={waitlistOpen} onClose={() => setWaitlistOpen(false)} />
+
+      {/* Coming Soon Popup */}
+      <AnimatePresence>
+        {comingSoon && (
+          <motion.div
+            initial={{ opacity: 0, y: -40 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -40 }}
+            transition={{ duration: 0.3 }}
+            className="fixed top-8 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#FE7743] to-[#F03709] text-white px-8 py-4 rounded-2xl shadow-2xl z-50 text-lg font-bold border border-white/20 backdrop-blur-xl"
+            style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.25)' }}
+          >
+            {comingSoon}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

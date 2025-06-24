@@ -107,30 +107,66 @@ export default function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [touched, setTouched] = useState<{ [key: string]: boolean }>({});
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
+    setTouched({
+      ...touched,
+      [e.target.name]: true,
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    
-    // Reset form after showing success
-    setTimeout(() => {
-      setIsSubmitted(false);
-      onClose();
-      setFormData({ name: "", email: "", company: "", role: "" });
-    }, 3000);
+    setErrorMessage("");
+    try {
+      const response = await fetch(
+        "http://geckai-development-env.eba-3fr3da5h.us-east-1.elasticbeanstalk.com/auth/invitation",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            name: formData.name,
+            companyName: formData.company,
+            role: formData.role,
+          }),
+        }
+      );
+      if (!response.ok) {
+        let msg = "There was an error joining the waitlist. Please try again.";
+        try {
+          const data = await response.json();
+          if (data && data.message) {
+            if (Array.isArray(data.message)) {
+              msg = data.message.join(' ');
+            } else if (typeof data.message === "string") {
+              msg = data.message;
+            }
+          }
+        } catch {}
+        setErrorMessage(msg);
+        return;
+      }
+      setIsSubmitted(true);
+      setTimeout(() => {
+        setIsSubmitted(false);
+        onClose();
+        setFormData({ name: "", email: "", company: "", role: "" });
+      }, 3000);
+    } catch {
+      setErrorMessage("There was an error joining the waitlist. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -200,7 +236,7 @@ export default function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
                   </svg>
                 </motion.div>
                 <h3 className="text-2xl font-bold text-white mb-2">Welcome aboard!</h3>
-                <p className="text-white/80">You've been added to our waitlist. We'll notify you when Geck is ready for you.</p>
+                <p className="text-white/80">You&apos;ve been added to our waitlist. We&apos;ll notify you when Geck is ready for you.</p>
               </motion.div>
             ) : (
               <>
@@ -244,7 +280,11 @@ export default function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
                       required
                       className="w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#FE7743] focus:border-transparent transition-all duration-200"
                       placeholder="Enter your full name"
+                      onBlur={() => setTouched({ ...touched, name: true })}
                     />
+                    {touched.name && !formData.name && (
+                      <div className="text-[#FE7743] text-xs font-medium mt-1">Full Name is required</div>
+                    )}
                   </motion.div>
 
                   <motion.div
@@ -265,7 +305,11 @@ export default function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
                       required
                       className="w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#FE7743] focus:border-transparent transition-all duration-200"
                       placeholder="Enter your email address"
+                      onBlur={() => setTouched({ ...touched, email: true })}
                     />
+                    {touched.email && !formData.email && (
+                      <div className="text-[#FE7743] text-xs font-medium mt-1">Email is required</div>
+                    )}
                   </motion.div>
 
                   <motion.div
@@ -285,6 +329,7 @@ export default function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
                       onChange={handleInputChange}
                       className="w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#FE7743] focus:border-transparent transition-all duration-200"
                       placeholder="Where do you work? (optional)"
+                      onBlur={() => setTouched({ ...touched, company: true })}
                     />
                   </motion.div>
 
@@ -302,7 +347,9 @@ export default function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
                       name="role"
                       value={formData.role}
                       onChange={handleInputChange}
+                      required
                       className="w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-[#FE7743] focus:border-transparent transition-all duration-200"
+                      onBlur={() => setTouched({ ...touched, role: true })}
                     >
                       <option value="" className="bg-black text-white">Select your role</option>
                       <option value="developer" className="bg-black text-white">Developer</option>
@@ -311,7 +358,14 @@ export default function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
                       <option value="engineering-manager" className="bg-black text-white">Engineering Manager</option>
                       <option value="other" className="bg-black text-white">Other</option>
                     </select>
+                    {touched.role && !formData.role && (
+                      <div className="text-[#FE7743] text-xs font-medium mt-1">Role is required</div>
+                    )}
                   </motion.div>
+
+                  {errorMessage && (
+                    <div className="text-red-400 text-center text-sm font-medium">{errorMessage}</div>
+                  )}
 
                   <motion.button
                     type="submit"
@@ -349,7 +403,7 @@ export default function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
                   transition={{ delay: 0.8 }}
                   className="text-center text-white/50 text-xs mt-6"
                 >
-                  By joining, you agree to receive updates about Geck's launch.
+                  By joining, you agree to receive updates about Geck&apos;s launch.
                 </motion.p>
               </>
             )}
@@ -358,4 +412,4 @@ export default function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
       )}
     </AnimatePresence>
   );
-} 
+}

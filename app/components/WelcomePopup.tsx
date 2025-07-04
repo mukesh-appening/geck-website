@@ -6,6 +6,7 @@ import Image from "next/image";
 interface WelcomePopupProps {
   isOpen: boolean;
   onClose: () => void;
+  onOpenWaitlist: () => void;
 }
 
 const modalVariants = {
@@ -77,7 +78,7 @@ const closeButtonVariants = {
   },
 };
 
-export default function WelcomePopup({ isOpen, onClose }: WelcomePopupProps) {
+export default function WelcomePopup({ isOpen, onClose, onOpenWaitlist }: WelcomePopupProps) {
   return (
     <AnimatePresence>
       {isOpen && (
@@ -168,7 +169,7 @@ export default function WelcomePopup({ isOpen, onClose }: WelcomePopupProps) {
                 <div className="flex items-start gap-2">
                   <span className="text-xl">🧪</span>
                   <div>
-                    <b>You&apos;re Helping Us Test</b><br />
+                    <b>You&apos;re Helping Us Improve Geck.</b><br />
                     <span className="text-white/70">We&apos;re giving you early access so you can:<br />
                     • Try it out.<br />
                     • Tell us what&apos;s broken.<br />
@@ -176,7 +177,7 @@ export default function WelcomePopup({ isOpen, onClose }: WelcomePopupProps) {
                     Your feedback is gold, and it&apos;ll help us make this better for everyone.</span>
                   </div>
                 </div>
-                <div className="flex items-start gap-2">
+                <div className="flex items-start gap-2 hidden">
                   <span className="text-xl">⚠️</span>
                   <div>
                     <b>Use With Caution</b><br />
@@ -190,7 +191,7 @@ export default function WelcomePopup({ isOpen, onClose }: WelcomePopupProps) {
                   <span className="text-xl">🎉</span>
                   <div>
                     <b>New Stuff Daily</b><br />
-                    <span className="text-white/70">We&apos;re updating and improving the product every day. You may see new features, fixes, and changes regularly.</span>
+                    <span className="text-white/70">We&apos;re updating and improving the product every day. You may see new features, fixes, and changes regularly! Please request features/report bugs (here’s how).</span>
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
@@ -210,8 +211,8 @@ export default function WelcomePopup({ isOpen, onClose }: WelcomePopupProps) {
                 <span className="text-white/40">— Team Geck</span>
               </div>
               <button
-                onClick={onClose}
-                className="mt-4 bg-[#FE7743] hover:bg-[#F03709] text-white font-semibold px-8 py-3 rounded-full shadow-lg transition-colors duration-200"
+                onClick={onOpenWaitlist}
+                className="mt-4 bg-[#FE7743] hover:bg-[#F03709] text-white font-semibold px-8 py-3 rounded-full shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-xl active:scale-95"
               >
                 Geck(t) early access!
               </button>

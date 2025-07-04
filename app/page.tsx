@@ -286,7 +286,7 @@ export default function Main() {
             <div className="w-full flex justify-center items-center  relative">
               <div className="relative w-full">
                 <video
-                  src="https://storage.googleapis.com/gweb-gemini-cdn/gemini/uploads/218d986f36a819d574c7d3a1cff9fb23081f74c5.mp4"
+                  src="/video.mp4"
                   autoPlay
                   loop
                   muted

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import WelcomePopupWrapper from "./components/WelcomePopupWrapper";
 
 export const metadata: Metadata = {
   title: "GECK",
@@ -53,6 +54,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="font-sans antialiased">
+        <WelcomePopupWrapper />
         <div>{children}</div>
       </body>
     </html>
